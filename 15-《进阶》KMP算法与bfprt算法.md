@@ -48,7 +48,7 @@ Code:
 
 ```Java
 public class Code01_KMP {
-    // O(N)
+    	// O(N)
 	public static int getIndexOf(String s, String m) {
 		if (s == null || m == null || m.length() < 1 || s.length() < m.length()) {
 			return -1;
@@ -60,33 +60,33 @@ public class Code01_KMP {
 		// match的长度M，M <= N   O(M)
 		int[] next = getNextArray(match); // next[i]  match中i之前的字符串match[0..i-1],最长前后缀相等的长度
 		// O(N)
-        // x在str中不越界，y在match中不越界
+        	// x在str中不越界，y在match中不越界
 		while (x < str.length && y < match.length) {
-            // 如果比对成功，x和y共同往各自的下一个位置移动
+            		// 如果比对成功，x和y共同往各自的下一个位置移动
 			if (str[x] == match[y]) {
 				x++;
 				y++;
 			} else if (next[y] == -1) { // 表示y已经来到了0位置 y == 0
-                // str换下一个位置进行比对
+                		// str换下一个位置进行比对
 				x++;
 			} else { // y还可以通过最大前后缀长度往前移动
 				y = next[y];
 			}
 		}
-	    // 1、 x越界，y没有越界，找不到，返回-1
-	    // 2、 x没越界，y越界，配出
-	    // 3、 x越界，y越界 ，配出，str的末尾，等于match
-	    // 只要y越界，就配出了，配出的位置等于str此时所在的位置x，减去y的长度。就是str存在匹配的字符串的开始位置
+	    	// 1、 x越界，y没有越界，找不到，返回-1
+	    	// 2、 x没越界，y越界，配出
+	    	// 3、 x越界，y越界 ，配出，str的末尾，等于match
+	    	// 只要y越界，就配出了，配出的位置等于str此时所在的位置x，减去y的长度。就是str存在匹配的字符串的开始位置
 		return y == match.length ? x - y : -1;
 	}
 
 	// M   O(M)
 	public static int[] getNextArray(char[] match) {
-    	// 如果match只有一个字符，人为规定-1
+    		// 如果match只有一个字符，人为规定-1
 		if (match.length == 1) {
 			return new int[] { -1 };
 		}
-    	// match不止一个字符，人为规定0位置是-1，1位置是0
+    		// match不止一个字符，人为规定0位置是-1，1位置是0
 		int[] next = new int[match.length];
 		next[0] = -1;
 		next[1] = 0;
@@ -100,10 +100,10 @@ public class Code01_KMP {
         		// cn++;
         		// 等同于
 				next[i++] = ++cn;
-      		// 跳失败，如果cn>0说明可以继续跳
+      			// 跳失败，如果cn>0说明可以继续跳
 			} else if (cn > 0) {
 				cn = next[cn];
-      		// 跳失败，跳到开头仍然不等
+      			// 跳失败，跳到开头仍然不等
 			} else {
 				next[i++] = 0;
 			}
@@ -270,18 +270,18 @@ public class Code01_FindMinKth {
 		// 不止一个数  L +  [0, R -L]，随机选一个数
 		int pivot = arr[L + (int) (Math.random() * (R - L + 1))];
 		
-    	// 返回以pivot为划分值的中间区域的左右边界
+    		// 返回以pivot为划分值的中间区域的左右边界
 		// range[0] range[1]
 		//  L   ..... R     pivot 
 		//  0         1000     70...800
 		int[] range = partition(arr, L, R, pivot);
-    	// 如果我们第k小的树正好在这个范围内，返回区域的左边界
+    		// 如果我们第k小的树正好在这个范围内，返回区域的左边界
 		if (index >= range[0] && index <= range[1]) {
 			return arr[index];
-      	// index比该区域的左边界小，递归左区间
+      		// index比该区域的左边界小，递归左区间
 		} else if (index < range[0]) {
 			return process2(arr, L, range[0] - 1, index);
-      	// index比该区域的右边界大，递归右区间
+      		// index比该区域的右边界大，递归右区间
 		} else {
 			return process2(arr, range[1] + 1, R, index);
 		}
@@ -338,7 +338,7 @@ public class Code01_FindMinKth {
 	// marr中的中位数，返回
 	public static int medianOfMedians(int[] arr, int L, int R) {
 		int size = R - L + 1;
-    	// 是否需要补最后一组，例如13，那么需要补最后一组，最后一组为3个数
+    		// 是否需要补最后一组，例如13，那么需要补最后一组，最后一组为3个数
 		int offset = size % 5 == 0 ? 0 : 1;
 		int[] mArr = new int[size / 5 + offset];
 		for (int team = 0; team < mArr.length; team++) {
