@@ -1,2 +1,3 @@
 # algorithm-note
-算法笔记
+
+左神算法课笔记
