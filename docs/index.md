@@ -1,15 +1,3 @@
-# 《algorithm-note》中文版
-
-## 笔记简介
-
-* 左神算法课笔记记录，当成工具书查阅，算法的提高还需结合大量的刷题
-* 出发点是，算法学习内容杂且难，整理一份尽可能还原课堂的笔记，当成工具书帮助复习
-* 如果本系列对您有用，点个star，谢谢
-
-## 笔记阅读传送门
-
-- GitHub Pages 完整阅读：[进入](https://dairongpeng.github.io/algorithm-note/)
-
 ## 目录概览
 
 - [x] [第一节 复杂度、排序、二分、异或](https://dairongpeng.github.io/algorithm-note/01)
