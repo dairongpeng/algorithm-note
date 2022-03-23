@@ -1,8 +1,6 @@
 [TOC]
 
-# 1 KMP算法
-
-`大厂劝退，面试高频^_^`
+# 1 KMP算法(面试高频，劝退)
 
 ## 1.1 KMP算法分析
 
@@ -26,7 +24,7 @@
 
 5、对于k位置前的字符，前后缀长度取5时，前缀为"abcab"后缀为"bcabc"不相等
 
-==注意前后缀长度不可取k位置前的整体长度6。那么此时k位置前的最大匹配长度为3==
+> 注意前后缀长度不可取k位置前的整体长度6。那么此时k位置前的最大匹配长度为3
 
 所以，例如"aaaaaab","b"的坐标为6，那么"b"坐标前的前后缀最大匹配长度为5
 
@@ -46,96 +44,87 @@
 
 Code:
 
-```Java
-public class Code01_KMP {
-    	// O(N)
-	public static int getIndexOf(String s, String m) {
-		if (s == null || m == null || m.length() < 1 || s.length() < m.length()) {
-			return -1;
-		}
-		char[] str = s.toCharArray();
-		char[] match = m.toCharArray();
-		int x = 0; // str中当前比对到的位置
-		int y = 0; // match中当前比对到的位置
-		// match的长度M，M <= N   O(M)
-		int[] next = getNextArray(match); // next[i]  match中i之前的字符串match[0..i-1],最长前后缀相等的长度
-		// O(N)
-        	// x在str中不越界，y在match中不越界
-		while (x < str.length && y < match.length) {
-            		// 如果比对成功，x和y共同往各自的下一个位置移动
-			if (str[x] == match[y]) {
-				x++;
-				y++;
-			} else if (next[y] == -1) { // 表示y已经来到了0位置 y == 0
-                		// str换下一个位置进行比对
-				x++;
-			} else { // y还可以通过最大前后缀长度往前移动
-				y = next[y];
-			}
-		}
-	    	// 1、 x越界，y没有越界，找不到，返回-1
-	    	// 2、 x没越界，y越界，配出
-	    	// 3、 x越界，y越界 ，配出，str的末尾，等于match
-	    	// 只要y越界，就配出了，配出的位置等于str此时所在的位置x，减去y的长度。就是str存在匹配的字符串的开始位置
-		return y == match.length ? x - y : -1;
+```Go
+package main
+
+import "fmt"
+
+// getIndexOf O(N)
+func getIndexOf(s string, m string) int {
+	if len(s) == 0 || len(m) == 0 || len(s) < len(m) {
+		return -1
 	}
 
-	// M   O(M)
-	public static int[] getNextArray(char[] match) {
-    		// 如果match只有一个字符，人为规定-1
-		if (match.length == 1) {
-			return new int[] { -1 };
+	str := []byte(s)
+	match := []byte(m)
+	x := 0 // str中当前比对到的位置
+	y := 0 // match中当前比对到的位置
+	// match的长度M，M <= N   O(M)
+	next := getNextArray(match) // next[i]  match中i之前的字符串match[0..i-1],最长前后缀相等的长度
+	// O(N)
+	// x在str中不越界，y在match中不越界
+	for x < len(str) && y < len(match) {
+		// 如果比对成功，x和y共同往各自的下一个位置移动
+		if str[x] == match[y] {
+			x++
+			y++
+		} else if next[y] == -1 { // 表示y已经来到了0位置 y == 0
+			// str换下一个位置进行比对
+			x++
+		} else { // y还可以通过最大前后缀长度往前移动
+			y = next[y]
 		}
-    		// match不止一个字符，人为规定0位置是-1，1位置是0
-		int[] next = new int[match.length];
-		next[0] = -1;
-		next[1] = 0;
-		int i = 2;
-		// cn代表，cn位置的字符，是当前和i-1位置比较的字符
-		int cn = 0;
-		while (i < next.length) {
-			if (match[i - 1] == match[cn]) { // 跳出来的时候
-        		// next[i] = cn+1;
-        		// i++;
-        		// cn++;
-        		// 等同于
-				next[i++] = ++cn;
-      			// 跳失败，如果cn>0说明可以继续跳
-			} else if (cn > 0) {
-				cn = next[cn];
-      			// 跳失败，跳到开头仍然不等
-			} else {
-				next[i++] = 0;
-			}
-		}
-		return next;
+	}
+	// 1、 x越界，y没有越界，找不到，返回-1
+	// 2、 x没越界，y越界，配出
+	// 3、 x越界，y越界 ，配出，str的末尾，等于match
+	// 只要y越界，就配出了，配出的位置等于str此时所在的位置x，减去y的长度。就是str存在匹配的字符串的开始位置
+	if y == len(match) {
+		return x - y
+	} else {
+		return -1
+	}
+}
+
+// M   O(M)
+func getNextArray(match []byte) []int {
+	// 如果match只有一个字符，人为规定-1
+	if len(match) == 1 {
+		return []int{-1}
 	}
 
-	// for test
-	public static String getRandomString(int possibilities, int size) {
-		char[] ans = new char[(int) (Math.random() * size) + 1];
-		for (int i = 0; i < ans.length; i++) {
-			ans[i] = (char) ((int) (Math.random() * possibilities) + 'a');
-		}
-		return String.valueOf(ans);
-	}
+	// match不止一个字符，人为规定0位置是-1，1位置是0
+	next := make([]int, len(match))
 
-	public static void main(String[] args) {
-		int possibilities = 5;
-		int strSize = 20;
-		int matchSize = 5;
-		int testTimes = 5000000;
-		System.out.println("test begin");
-		for (int i = 0; i < testTimes; i++) {
-			String str = getRandomString(possibilities, strSize);
-			String match = getRandomString(possibilities, matchSize);
-			if (getIndexOf(str, match) != str.indexOf(match)) {
-				System.out.println("Oops!");
-			}
-		}
-		System.out.println("test finish");
-	}
+	next[0] = -1
+	next[1] = 0
 
+	i := 2
+	// cn代表，cn位置的字符，是当前和i-1位置比较的字符
+	cn := 0
+	for i < len(next) {
+		if match[i - 1] == match[cn] { // 跳出来的时候
+			// next[i] = cn+1
+			// i++
+			// cn++
+			// 等同于
+			cn++
+			next[i] = cn
+			i++
+		} else if cn > 0 { // 跳失败，如果cn>0说明可以继续跳
+			cn = next[cn]
+		} else { // 跳失败，跳到开头仍然不等
+			next[i] = 0
+			i++
+		}
+	}
+	return next
+}
+
+func main() {
+	s := "abc1234efd"
+	m := "1234"
+	fmt.Println(getIndexOf(s, m))
 }
 ```
 
@@ -157,9 +146,7 @@ KMP解法：str1拼接str1得到str',"123456123456"，我们看str2是否是str'
 
 
 
-# 2 bfprt算法
-
-`面试常见`
+# 2 bfprt算法 (面试常见)
 
 情形：在一个无序数组中，怎么求第k小的数。如果通过排序，那么排序的复杂度为O(n*logn)。问，如何O(N)复杂度解决这个问题？
 
@@ -218,183 +205,205 @@ T(N) = T(N/5) + T(7n/10) + O(N)
 > bfprt算法在算法上的地位非常高，它发现只要涉及到我们随便定义的一个常数分组，得到一个表达式，最后收敛到O(N)，那么就可以通过O(N)的复杂度测试
 
 
-```Java
-public class Code01_FindMinKth {
+```Go
+package main
 
-	public static class MaxHeapComparator implements Comparator<Integer> {
+import (
+	"container/heap"
+	"fmt"
+	"math"
+	"math/rand"
+	"time"
+)
 
-		@Override
-		public int compare(Integer o1, Integer o2) {
-			return o2 - o1;
+type Heap []int
+
+func (h Heap) Less(i, j int) bool {
+	return h[i] > h[j] // 大根堆。小根堆实现为： h[i] <= h[j]
+}
+
+func (h Heap) Len() int {
+	return len(h)
+}
+
+func (h Heap) Swap(i, j int) {
+	h[i], h[j] = h[j], h[i]
+}
+
+func (h *Heap) Push(v interface{}) {
+	*h = append(*h, v.(int))
+}
+
+func (h *Heap) Pop() interface{} {
+	n := len(*h)
+	x := (*h)[n-1]
+	*h = (*h)[:n-1]
+	return x
+}
+
+// minKth1 找一个数组中第k小的数。方法1：利用大根堆，时间复杂度O(N*logK)
+func minKth1(arr []int, k int) int {
+	maxHeap := &Heap{}
+	for i := 0; i < k; i++ { // 加入大根堆
+		heap.Push(maxHeap, arr[i])
+	}
+	heap.Init(maxHeap)
+
+	for i := k; i < len(arr); i++ {
+		if arr[i] < (*maxHeap)[0] { // arr[i] 小于堆顶元素。堆顶元素就是0位置元素
+			// ！！！ 这里一定要使用系统包中的pop和push，然后把实现当前栈接口的结构传入
+			heap.Pop(maxHeap)          // 弹出
+			heap.Push(maxHeap, arr[i]) // 入堆
 		}
-
 	}
 
-	// 利用大根堆，时间复杂度O(N*logK)
-	public static int minKth1(int[] arr, int k) {
-		PriorityQueue<Integer> maxHeap = new PriorityQueue<>(new MaxHeapComparator());
-		for (int i = 0; i < k; i++) {
-			maxHeap.add(arr[i]);
-		}
-		for (int i = k; i < arr.length; i++) {
-			if (arr[i] < maxHeap.peek()) {
-				maxHeap.poll();
-				maxHeap.add(arr[i]);
-			}
-		}
-		return maxHeap.peek();
+	// return maxHeap.peek()
+	return (*maxHeap)[0]
+}
+
+// minKth2 找一个数组中第k小的数。方法2：利用快排，时间复杂度O(N)
+func minKth2(array []int, k int) int {
+	arr := copyArr(array)
+	return process2(arr, 0, len(arr)-1, k-1)
+}
+
+// copyArr 克隆数组，防止快排影响原数组的元素顺序
+func copyArr(arr []int) []int {
+	ans := make([]int, len(arr))
+	for i := 0; i < len(ans); i++ { // 这里copy数组，不可以使用append。
+		ans[i] = arr[i]
+	}
+	return ans
+}
+
+// arr 第k小的数: process2(arr, 0, N-1, k-1)
+// arr[L..R]  范围上，如果排序的话(不是真的去排序)，找位于index的数
+// index [L..R]
+// 通过荷兰国旗的优化，概率期望收敛于O(N)
+func process2(arr []int, L, R, index int) int {
+	if L == R { // L == R ==INDEX
+		return arr[L]
 	}
 
-	// 改写快排，时间复杂度O(N)
-	public static int minKth2(int[] array, int k) {
-		int[] arr = copyArray(array);
-		return process2(arr, 0, arr.length - 1, k - 1);
-	}
+	// 不止一个数  L +  [0, R -L]，随机选一个数.
+	pivot := arr[L+rand.Intn(R-L)]
 
-	public static int[] copyArray(int[] arr) {
-		int[] ans = new int[arr.length];
-		for (int i = 0; i != ans.length; i++) {
-			ans[i] = arr[i];
-		}
-		return ans;
+	// 返回以pivot为划分值的中间区域的左右边界
+	// range[0] range[1]
+	//  L   ..... R     pivot
+	//  0         1000     70...800
+	rg := partition(arr, L, R, pivot)
+	// 如果我们第k小的树正好在这个范围内，返回区域的左边界
+	if index >= rg[0] && index <= rg[1] {
+		return arr[index]
+	} else if index < rg[0] { // index比该区域的左边界小，递归左区间
+		return process2(arr, L, rg[0]-1, index)
+	} else { // index比该区域的右边界大，递归右区间
+		return process2(arr, rg[1]+1, R, index)
 	}
+}
 
-	// arr 第k小的数: process2(arr, 0, N-1, k-1) 
-	// arr[L..R]  范围上，如果排序的话(不是真的去排序)，找位于index的数
-	// index [L..R]
-  	// 通过荷兰国旗的优化，概率期望收敛于O(N)
-	public static int process2(int[] arr, int L, int R, int index) {
-		if (L == R) { // L == R ==INDEX
-			return arr[L];
-		}
-		// 不止一个数  L +  [0, R -L]，随机选一个数
-		int pivot = arr[L + (int) (Math.random() * (R - L + 1))];
-		
-    		// 返回以pivot为划分值的中间区域的左右边界
-		// range[0] range[1]
-		//  L   ..... R     pivot 
-		//  0         1000     70...800
-		int[] range = partition(arr, L, R, pivot);
-    		// 如果我们第k小的树正好在这个范围内，返回区域的左边界
-		if (index >= range[0] && index <= range[1]) {
-			return arr[index];
-      		// index比该区域的左边界小，递归左区间
-		} else if (index < range[0]) {
-			return process2(arr, L, range[0] - 1, index);
-      		// index比该区域的右边界大，递归右区间
+// partition 荷兰国旗partition问题
+func partition(arr []int, L, R, pivot int) []int {
+	less := L - 1
+	more := R + 1
+	cur := L
+	for cur < more {
+		if arr[cur] < pivot {
+			less++
+			arr[less], arr[cur] = arr[cur], arr[less]
+			cur++
+		} else if arr[cur] > pivot {
+			more--
+			arr[cur], arr[more] = arr[more], arr[cur]
 		} else {
-			return process2(arr, range[1] + 1, R, index);
+			cur++
 		}
 	}
+	return []int{less + 1, more - 1}
+}
 
-	public static int[] partition(int[] arr, int L, int R, int pivot) {
-		int less = L - 1;
-		int more = R + 1;
-		int cur = L;
-		while (cur < more) {
-			if (arr[cur] < pivot) {
-				swap(arr, ++less, cur++);
-			} else if (arr[cur] > pivot) {
-				swap(arr, cur, --more);
-			} else {
-				cur++;
-			}
-		}
-		return new int[] { less + 1, more - 1 };
+// minKth3 找一个数组中第k小的数。方法3：利用bfprt算法，时间复杂度O(N)
+func minKth3(array []int, k int) int {
+	arr := copyArr(array)
+	return bfprt(arr, 0, len(arr)-1, k-1)
+}
+
+// bfprt arr[L..R]  如果排序的话，位于index位置的数，是什么，返回
+func bfprt(arr []int, L, R, index int) int {
+	if L == R {
+		return arr[L]
 	}
 
-	public static void swap(int[] arr, int i1, int i2) {
-		int tmp = arr[i1];
-		arr[i1] = arr[i2];
-		arr[i2] = tmp;
+	// 通过bfprt分组，最终选出m。不同于随机选择m作为划分值
+	pivot := medianOfMedians(arr, L, R)
+	rg := partition(arr, L, R, pivot)
+	if index >= rg[0] && index <= rg[1] {
+		return arr[index]
+	} else if index < rg[0] {
+		return bfprt(arr, L, rg[0]-1, index)
+	} else {
+		return bfprt(arr, rg[1]+1, R, index)
+	}
+}
+
+// arr[L...R]  五个数一组
+// 每个小组内部排序
+// 每个小组中位数拿出来，组成marr
+// marr中的中位数，返回
+func medianOfMedians(arr []int, L, R int) int {
+	size := R - L - L
+	// 是否需要补最后一组，例如13，那么需要补最后一组，最后一组为3个数
+	offset := -1
+	if size%5 == 0 {
+		offset = 0
+	} else {
+		offset = 1
 	}
 
-	// 利用bfprt算法，时间复杂度O(N)
-	public static int minKth3(int[] array, int k) {
-		int[] arr = copyArray(array);
-		return bfprt(arr, 0, arr.length - 1, k - 1);
+	// 初始化数组
+	mArr := make([]int, size/5+offset)
+	for team := 0; team < len(mArr); team++ {
+		teamFirst := L + team*5
+		// L ... L + 4
+		// L +5 ... L +9
+		// L +10....L+14
+		mArr[team] = getMedian(arr, teamFirst, int(math.Min(float64(R), float64(teamFirst+4))))
 	}
 
-	// arr[L..R]  如果排序的话，位于index位置的数，是什么，返回
-	public static int bfprt(int[] arr, int L, int R, int index) {
-		if (L == R) {
-			return arr[L];
-		}
-    	// 通过bfprt分组，最终选出m。不同于随机选择m作为划分值
-		int pivot = medianOfMedians(arr, L, R);
-		int[] range = partition(arr, L, R, pivot);
-		if (index >= range[0] && index <= range[1]) {
-			return arr[index];
-		} else if (index < range[0]) {
-			return bfprt(arr, L, range[0] - 1, index);
-		} else {
-			return bfprt(arr, range[1] + 1, R, index);
-		}
-	}
+	// marr中，找到中位数，原问题是arr拿第k小的数，这里是中位数数组拿到中间位置的数（第mArr.length / 2小的数），相同的问题
+	// 返回值就是我们需要的划分值m
+	// marr(0, marr.len - 1,  mArr.length / 2 )
+	return bfprt(mArr, 0, len(mArr)-1, len(mArr)/2)
+}
 
-	// arr[L...R]  五个数一组
-	// 每个小组内部排序
-	// 每个小组中位数拿出来，组成marr
-	// marr中的中位数，返回
-	public static int medianOfMedians(int[] arr, int L, int R) {
-		int size = R - L + 1;
-    		// 是否需要补最后一组，例如13，那么需要补最后一组，最后一组为3个数
-		int offset = size % 5 == 0 ? 0 : 1;
-		int[] mArr = new int[size / 5 + offset];
-		for (int team = 0; team < mArr.length; team++) {
-			int teamFirst = L + team * 5;
-			// L ... L + 4
-			// L +5 ... L +9
-			// L +10....L+14
-			mArr[team] = getMedian(arr, teamFirst, Math.min(R, teamFirst + 4));
-		}
-		// marr中，找到中位数，原问题是arr拿第k小的数，这里是中位数数组拿到中间位置的数（第mArr.length / 2小的数），相同的问题
-   		// 返回值就是我们需要的划分值m
-		// marr(0, marr.len - 1,  mArr.length / 2 )
-		return bfprt(mArr, 0, mArr.length - 1, mArr.length / 2);
-	}
+func getMedian(arr []int, L, R int) int {
+	insertionSort(arr, L, R)
+	return arr[(L+R)/2]
+}
 
-	public static int getMedian(int[] arr, int L, int R) {
-		insertionSort(arr, L, R);
-		return arr[(L + R) / 2];
-	}
-
-  	// 由于确定是5个数排序，我们选择一个常数项最低的排序-插入排序
-	public static void insertionSort(int[] arr, int L, int R) {
-		for (int i = L + 1; i <= R; i++) {
-			for (int j = i - 1; j >= L && arr[j] > arr[j + 1]; j--) {
-				swap(arr, j, j + 1);
-			}
+// insertionSort 插入排序
+func insertionSort(arr []int, L, R int) {
+	for i := L + 1; i <= R; i++ {
+		for j := i - 1; j >= L && arr[j] > arr[j+1]; j-- {
+			arr[j], arr[j+1] = arr[j+1], arr[j]
 		}
 	}
+}
 
-	// for test
-	public static int[] generateRandomArray(int maxSize, int maxValue) {
-		int[] arr = new int[(int) (Math.random() * maxSize) + 1];
-		for (int i = 0; i < arr.length; i++) {
-			arr[i] = (int) (Math.random() * (maxValue + 1));
-		}
-		return arr;
-	}
+func main() {
+	/*
+	   rand.Seed:
+	       还函数是用来创建随机数的种子,如果不执行该步骤创建的随机数是一样的，因为默认Go会使用一个固定常量值来作为随机种子。
 
-	public static void main(String[] args) {
-		int testTime = 1000000;
-		int maxSize = 100;
-		int maxValue = 100;
-		System.out.println("test begin");
-		for (int i = 0; i < testTime; i++) {
-			int[] arr = generateRandomArray(maxSize, maxValue);
-			int k = (int) (Math.random() * arr.length) + 1;
-			int ans1 = minKth1(arr, k);
-			int ans2 = minKth2(arr, k);
-			int ans3 = minKth3(arr, k);
-			if (ans1 != ans2 || ans2 != ans3) {
-				System.out.println("Oops!");
-			}
-		}
-		System.out.println("test finish");
-	}
-
+	   time.Now().UnixNano():
+	       当前操作系统时间的毫秒值
+	*/
+	rand.Seed(time.Now().UnixNano())
+	arr := []int{3, 4, 6, 1, 77, 35, 26, 83, 56, 37}
+	fmt.Println(minKth1(arr, 3))
+	fmt.Println(minKth2(arr, 3))
+	fmt.Println(minKth3(arr, 3))
 }
 ```
 
