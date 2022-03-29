@@ -45,243 +45,199 @@ cur来到节点的时间复杂度为O(N),每个cur遍历左树最右边界的代
 
 
 
-```Java
-public class Code01_MorrisTraversal {
+```Go
+package main
 
-	public static class Node {
-		public int value;
-		Node left;
-		Node right;
+import (
+	"fmt"
+)
 
-		public Node(int data) {
-			this.value = data;
-		}
+type Node struct {
+	Left *Node
+	Right *Node
+	Val int
+}
+
+// morris遍历二叉树，实现时间复杂度O(N), 空间复杂度O(1)。正常的递归遍历，时间复杂度O(N)，空间复杂度O(N)
+func morris(head *Node) {
+	if head == nil {
+		return
 	}
 
-        // morris遍历
-	public static void morris(Node head) {
-		if (head == null) {
-			return;
-		}
-		Node cur = head;
-		Node mostRight = null;
-		while (cur != null) {
-			// cur有没有左树
-			mostRight = cur.left;
-			if (mostRight != null) { // 有左树的情况下
-				// 找到cur左树上，真实的最右
-				while (mostRight.right != null && mostRight.right != cur) {
-					mostRight = mostRight.right;
-				}
-				// 从while中出来，mostRight一定是cur左树上的最右节点
-				// mostRight如果等于null，说明第一次来到自己
-				if (mostRight.right == null) {
-					mostRight.right = cur;
-					cur = cur.left;
-					continue;
-                                // 否则第二次来到自己，意味着mostRight.right = cur
-				} else { // mostRight.right != null -> mostRight.right == cur
-					mostRight.right = null;
-				}
+	cur := head
+	var mostRight *Node
+	for cur != nil {
+		// cur有没有左树
+		mostRight = cur.Left
+		if mostRight != nil { // 有左树的情况下
+			// 找到cur左树上，真实的最右
+			for mostRight.Right != nil && mostRight.Right != cur {
+				mostRight = mostRight.Right
 			}
-			cur = cur.right;
-		}
-	}
 
-        // Morris中序遍历
-	public static void morrisIn(Node head) {
-		if (head == null) {
-			return;
-		}
-		Node cur = head;
-		Node mostRight = null;
-		while (cur != null) {
-			mostRight = cur.left;
-			if (mostRight != null) {
-				while (mostRight.right != null && mostRight.right != cur) {
-					mostRight = mostRight.right;
-				}
-				if (mostRight.right == null) {
-					mostRight.right = cur;
-					cur = cur.left;
-					continue;
-				} else {
-					mostRight.right = null;
-				}
-			}
-			System.out.print(cur.value + " ");
-			cur = cur.right;
-		}
-		System.out.println();
-	}
-
-        // Morris先序遍历
-	public static void morrisPre(Node head) {
-		if (head == null) {
-			return;
-		}
-		// cur
-		Node cur1 = head;
-		// mostRight
-		Node cur2 = null;
-		while (cur1 != null) {
-			cur2 = cur1.left;
-			if (cur2 != null) {
-				while (cur2.right != null && cur2.right != cur1) {
-					cur2 = cur2.right;
-				}
-				if (cur2.right == null) {
-					cur2.right = cur1;
-					System.out.print(cur1.value + " ");
-					cur1 = cur1.left;
-					continue;
-				} else {
-					cur2.right = null;
-				}
+			// 从while中出来，mostRight一定是cur左树上的最右节点
+			// mostRight如果等于null，说明第一次来到自己
+			if mostRight.Right == nil {
+				mostRight.Right = cur
+				cur = cur.Left
+				continue
 			} else {
-				System.out.print(cur1.value + " ");
+				// 否则第二次来到自己，意味着mostRight.right = cur
+				// mostRight.right != null -> mostRight.right == cur
+				mostRight.Right = nil
 			}
-			cur1 = cur1.right;
 		}
-		System.out.println();
+		cur = cur.Right
+	}
+}
+
+// morris 先序遍历二叉树
+func morrisPre(head *Node) {
+	if head == nil {
+		return
 	}
 
+	// cur
+	cur1 := head
+	// mostRight
+	var cur2 *Node
 
-        // Morris后序遍历
-	public static void morrisPos(Node head) {
-		if (head == null) {
-			return;
-		}
-		Node cur = head;
-		Node mostRight = null;
-		while (cur != null) {
-			mostRight = cur.left;
-			if (mostRight != null) {
-				while (mostRight.right != null && mostRight.right != cur) {
-					mostRight = mostRight.right;
-				}
-				if (mostRight.right == null) {
-					mostRight.right = cur;
-					cur = cur.left;
-					continue;
-					// 回到自己两次，且第二次回到自己的时候是打印时机
-				} else {
-					mostRight.right = null;
-					// 翻转右边界链表，打印
-					printEdge(cur.left);
-				}
+	for cur1 != nil {
+		cur2 = cur1.Left
+		if cur2 != nil {
+			for cur2.Right != nil && cur2.Right != cur1 {
+				cur2 = cur2.Right
 			}
-			cur = cur.right;
-		}
-		// while结束的时候，整颗树的右边界同样的翻转打印一次
-		printEdge(head);
-		System.out.println();
-	}
-
-	public static void printEdge(Node head) {
-		Node tail = reverseEdge(head);
-		Node cur = tail;
-		while (cur != null) {
-			System.out.print(cur.value + " ");
-			cur = cur.right;
-		}
-		reverseEdge(tail);
-	}
-
-	public static Node reverseEdge(Node from) {
-		Node pre = null;
-		Node next = null;
-		while (from != null) {
-			next = from.right;
-			from.right = pre;
-			pre = from;
-			from = next;
-		}
-		return pre;
-	}
-
-	// for test -- print tree
-	public static void printTree(Node head) {
-		System.out.println("Binary Tree:");
-		printInOrder(head, 0, "H", 17);
-		System.out.println();
-	}
-
-	public static void printInOrder(Node head, int height, String to, int len) {
-		if (head == null) {
-			return;
-		}
-		printInOrder(head.right, height + 1, "v", len);
-		String val = to + head.value + to;
-		int lenM = val.length();
-		int lenL = (len - lenM) / 2;
-		int lenR = len - lenM - lenL;
-		val = getSpace(lenL) + val + getSpace(lenR);
-		System.out.println(getSpace(height * len) + val);
-		printInOrder(head.left, height + 1, "^", len);
-	}
-
-	public static String getSpace(int num) {
-		String space = " ";
-		StringBuffer buf = new StringBuffer("");
-		for (int i = 0; i < num; i++) {
-			buf.append(space);
-		}
-		return buf.toString();
-	}
-
-
-
-        // 在Morris遍历的基础上，判断一颗树是不是一颗搜索二叉树
-        // 搜索二叉树是左比自己小，右比自己大
-        // 一颗树中序遍历，值一直在递增，就是搜索二叉树
-	public static boolean isBST(Node head) {
-		if (head == null) {
-			return true;
-		}
-		Node cur = head;
-		Node mostRight = null;
-		Integer pre = null;
-		boolean ans = true;
-		while (cur != null) {
-			mostRight = cur.left;
-			if (mostRight != null) {
-				while (mostRight.right != null && mostRight.right != cur) {
-					mostRight = mostRight.right;
-				}
-				if (mostRight.right == null) {
-					mostRight.right = cur;
-					cur = cur.left;
-					continue;
-				} else {
-					mostRight.right = null;
-				}
+			if cur2.Right == nil {
+				cur2.Right = cur1
+				fmt.Print(fmt.Sprintf("%d%s", cur1.Val, " "))
+				cur1 = cur1.Left
+				continue
+			} else {
+				cur2.Right = nil
 			}
-			if (pre != null && pre >= cur.value) {
-				ans = false;
-			}
-			pre = cur.value;
-			cur = cur.right;
+		} else {
+			fmt.Print(fmt.Sprintf("%d%s", cur1.Val, " "))
 		}
-		return ans;
+		cur1 = cur1.Right
+	}
+	fmt.Println()
+}
+
+// morris 中序遍历
+func morrisIn(head *Node) {
+	if head == nil {
+		return
 	}
 
-	public static void main(String[] args) {
-		Node head = new Node(4);
-		head.left = new Node(2);
-		head.right = new Node(6);
-		head.left.left = new Node(1);
-		head.left.right = new Node(3);
-		head.right.left = new Node(5);
-		head.right.right = new Node(7);
-		printTree(head);
-		morrisIn(head);
-		morrisPre(head);
-		morrisPos(head);
-		printTree(head);
+	cur := head
+	var mostRight *Node
+	for cur != nil {
+		mostRight = cur.Left
+		if mostRight != nil {
+			for mostRight.Right != nil && mostRight.Right != cur {
+				mostRight = mostRight.Right
+			}
+			if mostRight.Right == nil {
+				mostRight.Right = cur
+				cur = cur.Left
+				continue
+			} else {
+				mostRight.Right = nil
+			}
+		}
+		fmt.Print(fmt.Sprintf("%d%s", cur.Val, " "))
+		cur = cur.Right
+	}
+	fmt.Println()
+}
 
+// morris 后序遍历
+func morrisPos(head *Node) {
+	if head == nil {
+		return
 	}
 
+	cur := head
+	var mostRight *Node
+	for cur != nil {
+		mostRight = cur.Left
+		if mostRight != nil {
+			for mostRight.Right != nil && mostRight.Right != cur {
+				mostRight = mostRight.Right
+			}
+			if mostRight.Right == nil {
+				mostRight.Right = cur
+				cur = cur.Left
+				continue
+			} else { // 回到自己两次，且第二次回到自己的时候是打印时机
+				mostRight.Right = nil
+				// 翻转右边界链表，打印
+				printEdge(cur.Left)
+			}
+		}
+		cur = cur.Right
+	}
+	// while结束的时候，整颗树的右边界同样的翻转打印一次
+	printEdge(head)
+	fmt.Println()
+}
+
+func printEdge(head *Node) {
+	tali := reverseEdge(head)
+	cur := tali
+	for cur != nil {
+		fmt.Print(fmt.Sprintf("%d%s", cur.Val, " "))
+		cur = cur.Right
+	}
+	reverseEdge(tali)
+}
+
+func reverseEdge(from *Node) *Node {
+	var pre *Node
+	var next *Node
+	for from != nil {
+		next = from.Right
+		from.Right = pre
+		pre = from
+		from = next
+	}
+	return pre
+}
+
+// 在Morris遍历的基础上，判断一颗树是不是一颗搜索二叉树
+// 搜索二叉树是左比自己小，右比自己大
+// 一颗树中序遍历，值一直在递增，就是搜索二叉树
+func isBST(head *Node) bool {
+	if head == nil {
+		return true
+	}
+	
+	cur := head
+	var mostRight *Node
+	var pre int
+	var ans bool
+	for cur != nil {
+		mostRight = cur.Left
+		if mostRight != nil {
+			for mostRight.Right != nil && mostRight.Right != cur {
+				mostRight = mostRight.Right
+			}
+			if mostRight.Right == nil {
+				mostRight.Right = cur
+				cur = cur.Left
+				continue
+			} else {
+				mostRight.Right = nil
+			}
+		}
+		if  pre >= cur.Val {
+			ans = false
+		}
+		pre = cur.Val
+		cur = cur.Right
+	}
+	return ans
 }
 ```
 
@@ -294,122 +250,91 @@ public class Code01_MorrisTraversal {
 
 > Morris遍历求解，每到达一个cur的时候，记录高度。每到达一个cur的时候判断cur是否为叶子节点，更新全局最小值。最后看一下最后一个节点的高度和全局最小高度对比，取最小高度
 
-```Java
-public class Code05_MinHeight {
+```Go
+package main
 
-	public static class Node {
-		public int val;
-		public Node left;
-		public Node right;
+import "math"
 
-		public Node(int x) {
-			val = x;
-		}
+type Node struct {
+	Left *Node
+	Right *Node
+	Val int
+}
+
+// 求二叉树最小高度；解法1 运用二叉树的递归
+func minHeight1(head *Node) int {
+	if head == nil {
+		return 0
+	}
+	return p(head)
+}
+
+func p(x *Node) int {
+	if x.Left == nil && x.Right == nil {
+		return 1
 	}
 
-        // 解法1 运用二叉树的递归
-	public static int minHeight1(Node head) {
-		if (head == null) {
-			return 0;
-		}
-		return p(head);
+	// 左右子树起码有一个不为空
+	leftH := math.MaxInt
+	if x.Left != nil {
+		leftH = p(x.Left)
 	}
 
-	public static int p(Node x) {
-		if (x.left == null && x.right == null) {
-			return 1;
-		}
-		// 左右子树起码有一个不为空
-		int leftH = Integer.MAX_VALUE;
-		if (x.left != null) {
-			leftH = p(x.left);
-		}
-		int rightH = Integer.MAX_VALUE;
-		if (x.right != null) {
-			rightH = p(x.right);
-		}
-		return 1 + Math.min(leftH, rightH);
+	rightH := math.MaxInt
+	if x.Right != nil {
+		rightH = p(x.Right)
 	}
 
-	// 解法2 根据morris遍历改写
-	public static int minHeight2(Node head) {
-		if (head == null) {
-			return 0;
-		}
-		Node cur = head;
-		Node mostRight = null;
-		int curLevel = 0;
-		int minHeight = Integer.MAX_VALUE;
-		while (cur != null) {
-			mostRight = cur.left;
-			if (mostRight != null) {
-				int rightBoardSize = 1;
-				while (mostRight.right != null && mostRight.right != cur) {
-					rightBoardSize++;
-					mostRight = mostRight.right;
-				}
-				if (mostRight.right == null) { // 第一次到达
-					curLevel++;
-					mostRight.right = cur;
-					cur = cur.left;
-					continue;
-				} else { // 第二次到达
-					if (mostRight.left == null) {
-						minHeight = Math.min(minHeight, curLevel);
-					}
-					curLevel -= rightBoardSize;
-					mostRight.right = null;
-				}
-			} else { // 只有一次到达
-				curLevel++;
+	return 1 + int(math.Min(float64(leftH), float64(rightH)))
+}
+
+// 解法2 根据morris遍历改写
+func minHeight2(head *Node) int {
+	if head == nil {
+		return 0
+	}
+
+	cur := head
+	var mostRight *Node
+	curLevel := 0
+	minnHeight := math.MaxInt
+	for cur != nil {
+		mostRight = cur.Left
+		if mostRight != nil {
+			rightBoardSize := 1
+			for mostRight.Right != nil && mostRight.Right != cur {
+				rightBoardSize++
+				mostRight = mostRight.Right
 			}
-			cur = cur.right;
-		}
-		int finalRight = 1;
-		cur = head;
-		while (cur.right != null) {
-			finalRight++;
-			cur = cur.right;
-		}
-		if (cur.left == null && cur.right == null) {
-			minHeight = Math.min(minHeight, finalRight);
-		}
-		return minHeight;
-	}
 
-	// for test
-	public static Node generateRandomBST(int maxLevel, int maxValue) {
-		return generate(1, maxLevel, maxValue);
-	}
-
-	// for test
-	public static Node generate(int level, int maxLevel, int maxValue) {
-		if (level > maxLevel || Math.random() < 0.5) {
-			return null;
-		}
-		Node head = new Node((int) (Math.random() * maxValue));
-		head.left = generate(level + 1, maxLevel, maxValue);
-		head.right = generate(level + 1, maxLevel, maxValue);
-		return head;
-	}
-
-	public static void main(String[] args) {
-		int treeLevel = 7;
-		int nodeMaxValue = 5;
-		int testTimes = 100000;
-		System.out.println("test begin");
-		for (int i = 0; i < testTimes; i++) {
-			Node head = generateRandomBST(treeLevel, nodeMaxValue);
-			int ans1 = minHeight1(head);
-			int ans2 = minHeight2(head);
-			if (ans1 != ans2) {
-				System.out.println("Oops!");
+			if mostRight.Right == nil { // 第一次到达
+				curLevel++
+				mostRight.Right = cur
+				cur = cur.Left
+				continue
+			} else { // 第二次到达
+				if mostRight.Left == nil {
+					minnHeight = int(math.Min(float64(minnHeight), float64(minnHeight)))
+				}
+				curLevel -= rightBoardSize
+				mostRight.Right = nil
 			}
+		} else { // 只有一次到达
+			curLevel++
 		}
-		System.out.println("test finish!");
-
+		cur = cur.Right
 	}
 
+	finalRight := 1
+	cur = head // 回到头结点
+	for cur.Right != nil {
+		finalRight++
+		cur = cur.Right
+	}
+	if cur.Left == nil && cur.Right == nil {
+		minnHeight = int(math.Min(float64(minnHeight), float64(finalRight)))
+	}
+	return minnHeight
 }
 ```
 
